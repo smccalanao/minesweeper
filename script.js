@@ -9,7 +9,7 @@ const FACES = {
 
 const SAFE_EMOJIS = ["😂", "😍", "😉"];
 const UNSAFE_EMOJI = "😭";
-const PEEK_DURATION_MS = 2500;
+const PEEK_DURATION_MS = 1000;
 const PEEK_LIMIT = 3;
 const WIN_FLASH_DURATION_MS = 900;
 const DOUBLE_TAP_MS = 350;

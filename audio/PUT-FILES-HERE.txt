@@ -1,0 +1,16 @@
+Ilagay dito ang sarili mong audio files:
+
+  win.mp3   - tumutugtog kapag nanalo
+  lose.mp3  - tumutugtog kapag natalo
+
+Supported formats: .mp3, .wav, .ogg (depende sa browser)
+
+Kung iba ang filename, i-update ang AUDIO object sa script.js:
+
+  const AUDIO = {
+    win: "audio/your-win-file.mp3",
+    lose: "audio/your-lose-file.mp3",
+    volume: 0.6,
+  };
+
+Kung wala pang files, gagamitin ang built-in music ng game.

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minesweeper</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>Minesweeper</h1>
+      <p class="subtitle">Left-click to reveal · Right-click to peek (3x) · Shift+right-click to flag</p>
+    </header>
+
+    <div class="controls">
+      <button id="new-game" type="button">New Game</button>
+    </div>
+
+    <div class="game-panel">
+      <div class="status-bar">
+        <div class="counter" id="mine-counter" aria-label="Mines remaining">005</div>
+        <div class="counter peek-counter" id="peek-counter" aria-label="Peeks remaining" title="Right-click peeks left">003</div>
+        <button id="face-btn" class="face-btn" type="button" aria-label="New game">🙂</button>
+        <div class="counter" id="timer" aria-label="Elapsed time">000</div>
+      </div>
+
+      <div id="board" class="board" role="grid" aria-label="Minesweeper board"></div>
+    </div>
+
+    <div id="message" class="message hidden" role="status"></div>
+
+    <div id="boom-overlay" class="boom-overlay hidden" aria-hidden="true">
+      <div class="boom-lights" aria-hidden="true">
+        <span class="boom-light boom-light--r"></span>
+        <span class="boom-light boom-light--o"></span>
+        <span class="boom-light boom-light--y"></span>
+        <span class="boom-light boom-light--g"></span>
+        <span class="boom-light boom-light--b"></span>
+        <span class="boom-light boom-light--i"></span>
+        <span class="boom-light boom-light--v"></span>
+      </div>
+      <div class="boom-flash" aria-hidden="true"></div>
+      <div class="boom-popup" role="alertdialog" aria-labelledby="boom-title" aria-describedby="boom-desc">
+        <div class="boom-popup-ring" aria-hidden="true"></div>
+        <p class="boom-emoji">💥😭💥</p>
+        <h2 id="boom-title">BOOM!</h2>
+        <p id="boom-desc">Nanabit ka sa bomba!</p>
+        <button id="boom-retry" type="button">Try Again</button>
+      </div>
+    </div>
+
+    <div id="win-overlay" class="win-overlay hidden" aria-hidden="true">
+      <div id="win-white-flash" class="win-white-flash hidden" aria-hidden="true"></div>
+      <canvas id="fireworks-canvas"></canvas>
+      <div class="win-banner" role="status">
+        <p class="win-banner-emoji">🎉🎆🎉</p>
+        <h2>You Win!</h2>
+        <p class="win-banner-sub">Binuksan mo lahat ng safe cells!</p>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>Built for static hosting · Works on <a href="https://www.infinityfree.com/" target="_blank" rel="noopener noreferrer">InfinityFree</a></p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

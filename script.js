@@ -9,7 +9,7 @@ const FACES = {
 
 const SAFE_EMOJIS = ["😂", "😍", "😉"];
 const UNSAFE_EMOJI = "😭";
-const PEEK_DURATION_MS = 700;
+const PEEK_DURATION_MS = 2500;
 const PEEK_LIMIT = 3;
 const WIN_FLASH_DURATION_MS = 900;
 const DOUBLE_TAP_MS = 350;
@@ -36,6 +36,7 @@ const timerEl = document.getElementById("timer");
 const faceBtn = document.getElementById("face-btn");
 const messageEl = document.getElementById("message");
 const newGameBtn = document.getElementById("new-game");
+const peekBtn = document.getElementById("peek-btn");
 const boomOverlay = document.getElementById("boom-overlay");
 const boomRetryBtn = document.getElementById("boom-retry");
 const winOverlay = document.getElementById("win-overlay");
@@ -288,6 +289,7 @@ async function playLoseMusic() {
 function init() {
   initCustomAudio();
   newGameBtn.addEventListener("click", startNewGame);
+  peekBtn.addEventListener("click", onPeekButtonClick);
   faceBtn.addEventListener("click", startNewGame);
   boomRetryBtn.addEventListener("click", startNewGame);
   document.addEventListener("click", unlockAudio, { once: true });
@@ -545,6 +547,12 @@ function handleRightClick(event) {
   requestPeek(row, col);
 }
 
+function onPeekButtonClick() {
+  const safeRow = Math.floor(rows / 2);
+  const safeCol = Math.floor(cols / 2);
+  requestPeek(safeRow, safeCol);
+}
+
 function requestPeek(row, col) {
   if (gameOver || gameWon || isPeeking) return;
 
@@ -703,6 +711,8 @@ function endGame(won, hitRow, hitCol) {
     revealAllMines(hitRow, hitCol);
     showBoomPopup();
   }
+
+  updatePeekCounter();
 }
 
 function flagAllMines() {
@@ -743,6 +753,7 @@ function updateMineCounter() {
 function updatePeekCounter() {
   peekCounterEl.textContent = String(peekCount).padStart(3, "0");
   peekCounterEl.classList.toggle("peek-counter--empty", peekCount <= 0);
+  peekBtn.disabled = peekCount <= 0 || gameOver || gameWon;
 }
 
 function updateTimerDisplay() {

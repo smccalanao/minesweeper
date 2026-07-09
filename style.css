@@ -93,7 +93,8 @@ body {
 }
 
 .difficulty select,
-#new-game {
+#new-game,
+#peek-btn {
   font: inherit;
   border: none;
   border-radius: 6px;
@@ -112,6 +113,22 @@ body {
   color: #fff;
   font-weight: 600;
   transition: filter 0.15s ease;
+}
+
+#peek-btn {
+  background: #0088ff;
+  color: #fff;
+  font-weight: 600;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+#peek-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+#peek-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 #new-game:hover {

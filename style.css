@@ -58,6 +58,20 @@ body {
   font-size: 0.9rem;
 }
 
+.subtitle--mobile {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .subtitle--desktop {
+    display: none;
+  }
+
+  .subtitle--mobile {
+    display: block;
+  }
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;

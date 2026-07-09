@@ -12,6 +12,8 @@ const UNSAFE_EMOJI = "😭";
 const PEEK_DURATION_MS = 700;
 const PEEK_LIMIT = 3;
 const WIN_FLASH_DURATION_MS = 900;
+const DOUBLE_TAP_MS = 350;
+const LONG_PRESS_MS = 500;
 
 // --- Custom audio (optional) ---
 // 1. Gumawa ng folder: audio/
@@ -68,6 +70,10 @@ let peekTimeout = null;
 let peekCount = PEEK_LIMIT;
 let winFlashTimeout = null;
 let fireworksBlinding = false;
+let lastTap = null;
+let singleTapTimer = null;
+let longPressTimer = null;
+let suppressNextTap = false;
 
 let audioCtx = null;
 let musicMasterGain = null;
@@ -311,6 +317,7 @@ function startNewGame() {
   hideWinFireworks();
   stopGameMusic();
   cancelPeek();
+  clearTouchTimers();
   buildBoard();
   renderBoard();
 }
@@ -383,10 +390,14 @@ function renderBoard() {
       cell.dataset.row = r;
       cell.dataset.col = c;
       cell.setAttribute("aria-label", `Cell row ${r + 1} column ${c + 1}`);
-      cell.addEventListener("click", onLeftClick);
+      cell.addEventListener("click", onCellClick);
       cell.addEventListener("contextmenu", onCellContextMenu);
       cell.addEventListener("mousedown", onCellMouseDown);
       cell.addEventListener("mouseup", onCellMouseUp);
+      cell.addEventListener("touchstart", onCellTouchStart, { passive: true });
+      cell.addEventListener("touchend", onCellTouchEnd);
+      cell.addEventListener("touchmove", onCellTouchMove, { passive: true });
+      cell.addEventListener("touchcancel", onCellTouchCancel);
       boardEl.appendChild(cell);
     }
   }
@@ -396,11 +407,97 @@ function getCellEl(row, col) {
   return boardEl.querySelector(`[data-row="${row}"][data-col="${col}"]`);
 }
 
-function onLeftClick(event) {
+function isTouchDevice() {
+  return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+}
+
+function clearTouchTimers() {
+  clearTimeout(singleTapTimer);
+  clearTimeout(longPressTimer);
+  singleTapTimer = null;
+  longPressTimer = null;
+  lastTap = null;
+  suppressNextTap = false;
+}
+
+function onCellClick(event) {
+  if (isTouchDevice()) return;
+
   event.preventDefault();
   const row = Number(event.currentTarget.dataset.row);
   const col = Number(event.currentTarget.dataset.col);
   revealCell(row, col);
+}
+
+function onCellTouchStart(event) {
+  if (!isTouchDevice()) return;
+
+  const row = Number(event.currentTarget.dataset.row);
+  const col = Number(event.currentTarget.dataset.col);
+
+  longPressTimer = setTimeout(() => {
+    longPressTimer = null;
+    suppressNextTap = true;
+    clearTimeout(singleTapTimer);
+    singleTapTimer = null;
+    lastTap = null;
+
+    if (gameOver || gameWon || isPeeking) return;
+
+    ensureMinesPlaced(row, col);
+    toggleFlag(row, col);
+  }, LONG_PRESS_MS);
+}
+
+function onCellTouchMove() {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+}
+
+function onCellTouchCancel() {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+}
+
+function onCellTouchEnd(event) {
+  if (!isTouchDevice()) return;
+
+  const row = Number(event.currentTarget.dataset.row);
+  const col = Number(event.currentTarget.dataset.col);
+
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+
+  if (suppressNextTap) {
+    suppressNextTap = false;
+    return;
+  }
+
+  if (gameOver || gameWon || isPeeking) return;
+
+  const now = Date.now();
+  const cellKey = `${row},${col}`;
+
+  if (lastTap?.key === cellKey && now - lastTap.time < DOUBLE_TAP_MS) {
+    clearTimeout(singleTapTimer);
+    singleTapTimer = null;
+    lastTap = null;
+    requestPeek(row, col);
+    return;
+  }
+
+  lastTap = { key: cellKey, time: now };
+  singleTapTimer = setTimeout(() => {
+    singleTapTimer = null;
+    lastTap = null;
+    revealCell(row, col);
+  }, DOUBLE_TAP_MS);
 }
 
 function onCellContextMenu(event) {
@@ -444,6 +541,14 @@ function handleRightClick(event) {
     toggleFlag(row, col);
     return;
   }
+
+  requestPeek(row, col);
+}
+
+function requestPeek(row, col) {
+  if (gameOver || gameWon || isPeeking) return;
+
+  ensureMinesPlaced(row, col);
 
   if (peekCount <= 0) {
     showMessage(`Walang peek na natira! (${PEEK_LIMIT}/${PEEK_LIMIT} nagamit na)`, "info");
